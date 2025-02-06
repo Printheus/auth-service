@@ -1,0 +1,19 @@
+[project]
+name = "auth-service"
+version = "0.1.0"
+description = "Authentication service with FastAPI"
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+license = {text = "GPL-3"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "uvicorn[standard] (>=0.34.0,<0.35.0)",
+    "fastapi[standard] (>=0.115.8,<0.116.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
