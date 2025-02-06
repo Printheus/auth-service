@@ -1,7 +1,8 @@
+from core.config_manager import conf
 from fastapi import FastAPI
 
 app = FastAPI()
 
 @app.get("/")
-def read_root():
+async def index():
     return "Hello World"
