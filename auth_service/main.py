@@ -1,8 +1,20 @@
 from core.config_manager import conf
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from core.models import Base
+from core.database import engine, get_db
+from core.controllers import UserController
+from core.schema import UserCreate
+
+async def create_all():
+    async with engine.begin() as con:
+        await con.run_sync(Base.metadata.create_all)
+
 
 app = FastAPI()
+app.add_event_handler("startup", create_all)
 
-@app.get("/")
-async def index():
-    return "Hello World"
+
+@app.post("/")
+async def index(user:UserCreate, db=Depends(get_db)):
+    user = await UserController(db).create(user)
+    return user
