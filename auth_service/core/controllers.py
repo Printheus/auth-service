@@ -15,8 +15,7 @@ class UserController:
         return result.scalars().first()
 
     async def create(self, user:schema.UserCreate):
-        # TODO: Hash password
-        user = User(**user.dict())
+        user = User(**user.model_dump())
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)
