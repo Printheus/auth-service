@@ -6,7 +6,6 @@ class ConfigManager:
         mod = importlib.import_module("core.config")
         for setting in dir(mod):
             if setting.isupper():
-                print(setting)
                 setting_value = getattr(mod, setting)
                 setattr(self, setting, setting_value)
 
