@@ -6,6 +6,7 @@ from .config_manager import conf
 
 engine = create_async_engine(
     sa.URL.create(**conf.db_conf),
+    poolclass=sa.AsyncAdaptedQueuePool, 
     echo=False,
     pool_size=20,
     max_overflow=0
