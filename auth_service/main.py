@@ -19,6 +19,4 @@ app.add_event_handler("startup", create_all)
 async def index(user:UserCreate, db=Depends(get_db)):
     user.password = bcrypt_hasher(user.password).decode()
     user = await UserController(db).create(user)
-    return user.user_id
-    user = await UserController(db).create(user)
     return user
