@@ -21,3 +21,12 @@ async def test_create_user(mock_db):
     data = schema.UserCreate(username="test", password="test123")
     user = await UserController(mock_db).create(data)
     assert user is not None
+
+@pytest.mark.asyncio
+async def test_hash_passwd(mock_db):
+    data = schema.UserCreate(username="test", password="test123")
+    user = await UserController(mock_db).create(data)
+    assert user is not None, "Failed to create user"
+    assert user.password is not None, "Password is None"
+    assert user.password != "test123", f"password is plaintext password"
+    assert user.password.startswith("$2b$"), "password is not of type bcrypt"
