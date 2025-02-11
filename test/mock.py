@@ -27,3 +27,9 @@ async def mock_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
     os.remove("test.sqlite3")
+
+@pytest_asyncio.fixture()
+async def client(mock_db):
+    app.dependency_overrides[get_db] = lambda: mock_db
+    with TestClient(app) as client:
+        yield client
