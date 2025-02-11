@@ -1,10 +1,10 @@
-from core.config_manager import conf
+from .core.config_manager import conf
 from fastapi import FastAPI, Depends
-from core.models import Base
-from core.database import engine, get_db
-from core.controllers import UserController
-from core.schema import UserCreate
-from core.utils import bcrypt_hasher
+from .core.models import Base
+from .core.database import engine, get_db
+from .core.controllers import UserController
+from .core.schema import UserCreate
+from .core.utils import bcrypt_hasher
 
 async def create_all():
     async with engine.begin() as con:
