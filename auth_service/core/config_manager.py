@@ -14,4 +14,16 @@ class ConfigManager:
     def db_conf(self):
         return self.DATABASE
 
+    @property 
+    def private_key(self):
+        with open(self.PRIVATE_KEY, "r") as pk_file:
+            pk = pk_file.read()
+        return pk
+    @property 
+    def public_key(self):
+        with open(self.PUBLIC_KEY, "r") as pk_file:
+            pk = pk_file.read()
+        return pk
+
+
 conf = ConfigManager()
