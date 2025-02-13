@@ -21,7 +21,14 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
         )
     role = "admin" if user.is_admin else "base"
     token = create_access_token(
-        subject=user.user_id, username=user.username, user_role=role
+        subject=str(user.user_id), username=user.username, user_role=role
     )
 
-    # response.set_cookie()
+    response.set_cookie(
+        key="Access-Token",
+        value=token,
+        secure=True,
+        httponly=True,
+        samesite="strict",
+    )
+    return None
