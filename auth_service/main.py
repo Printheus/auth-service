@@ -5,6 +5,10 @@ from .core.database import engine, get_db
 from .core.controllers import UserController
 from .core.schema import UserCreate
 
+#views
+from .basic.views import router as basic_router
+
+
 async def create_all():
     async with engine.begin() as con:
         await con.run_sync(Base.metadata.create_all)
@@ -13,6 +17,7 @@ async def create_all():
 app = FastAPI()
 app.add_event_handler("startup", create_all)
 
+app.include_router(basic_router)
 
 @app.post("/")
 async def index(user:UserCreate, db=Depends(get_db)):

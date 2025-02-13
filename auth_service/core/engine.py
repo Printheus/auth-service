@@ -3,13 +3,9 @@ from .controllers import UserController, AsyncSession
 
 
 class AbstractAuthEngine(ABC):
-    def __init__(self, user_controller: UserController):
-        self.user_controller = user_controller
+    def __init__(self, db: AsyncSession):
+        self.user_controller = UserController(db)
         super().__init__()
 
     @abstractmethod
     async def authenticate(self): ...
-    @abstractmethod
-    async def is_acceptable(self) -> bool: ...
-    @abstractmethod
-    def is_valid(self) -> bool: ...

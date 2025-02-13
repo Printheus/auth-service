@@ -18,7 +18,7 @@ class UserController:
         result = await self.db.scalars(query)
         return result.first()
 
-    async def create(self, user:schema.UserCreate):
+    async def create(self, user: schema.UserCreate):
         user.password = bcrypt_hasher(user.password).decode()
         user = User(**user.model_dump())
         self.db.add(user)
@@ -26,8 +26,14 @@ class UserController:
             await self.db.commit()
             await self.db.refresh(user)
         except IntegrityError as e:
-            raise HTTPException(status_code=400, detail="duplicated in username or email or phone")
+            raise HTTPException(
+                status_code=400, detail="duplicated in username or email or phone"
+            )
         return user
 
-    async def retrieve_by_username(username:str):
-        ...
+    async def retrieve_by_username(self, username: str) -> User | None:
+        query = sa.select(User).where(
+            User.username == username
+        )
+        result = await self.db.scalars(query)
+        return result.first()

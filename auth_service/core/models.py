@@ -1,11 +1,11 @@
 from .database import Base
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, foreign
 import sqlalchemy as sa
 import uuid
 
 
 class User(Base):
-    __tablename__ = "User"
+    __tablename__ = "Users"
 
     password: Mapped[str]
     username: Mapped[str] = mapped_column(unique=True)
