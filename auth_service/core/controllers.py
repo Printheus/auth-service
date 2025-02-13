@@ -1,4 +1,7 @@
+from fastapi.exceptions import HTTPException
+
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 import sqlalchemy as sa
 
 from .models import User, uuid
@@ -19,8 +22,11 @@ class UserController:
         user.password = bcrypt_hasher(user.password).decode()
         user = User(**user.model_dump())
         self.db.add(user)
-        await self.db.commit()
-        await self.db.refresh(user)
+        try:
+            await self.db.commit()
+            await self.db.refresh(user)
+        except IntegrityError as e:
+            raise HTTPException(status_code=400, detail="duplicated in username or email or phone")
         return user
 
     async def retrieve_by_username(username:str):
