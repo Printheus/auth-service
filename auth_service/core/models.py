@@ -11,6 +11,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(unique=True)
     phone: Mapped[str | None] = mapped_column(nullable=True, unique=True)
     email: Mapped[str | None] = mapped_column(nullable=True, unique=True)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    is_admin: Mapped[bool] = mapped_column(default=False)
     user_id: Mapped[str] = mapped_column(
         sa.types.UUID,
         primary_key=True,
