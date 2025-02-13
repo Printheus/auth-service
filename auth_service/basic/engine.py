@@ -1,23 +1,20 @@
 from fastapi import exceptions, status
+from bcrypt import checkpw
 from auth_service.core.engine import AbstractAuthEngine
 from auth_service.core.models import User
-from bcrypt import checkpw
 from .schema import LoginRequestData
 
 
 class BasicAuthEngine(AbstractAuthEngine):
-    async def authenticate(self, data: LoginRequestData):
+    async def authenticate(self, data: LoginRequestData) -> User | None:
+
         user = await self.user_controller.retrieve_by_username(data.username)
-        if user is None or checkpw(data.password.encode(), user.password.encode()):
+        if (user is None) or (
+            not checkpw(data.password.encode(), user.password.encode())
+        ):
+            return None
+        if not user.is_active:
             raise exceptions.HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="not found."
+                status_code=status.HTTP_403_FORBIDDEN, detail="user is not active"
             )
         return user
-
-    def is_valid(self):
-        return super().is_valid()
-
-    def is_acceptable(self, user: User):
-        # check user type and type available logins
-        # check if user is active
-        return super().is_acceptable()
