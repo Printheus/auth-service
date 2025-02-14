@@ -1,3 +1,4 @@
+from logging import getLogger
 from fastapi import Depends, Response, exceptions, status
 from fastapi.routing import APIRouter
 from auth_service.core.database import get_db
@@ -6,6 +7,7 @@ from .schema import LoginRequestData
 from .engine import BasicAuthEngine
 
 # add views heres
+logger = getLogger(__name__)
 
 router = APIRouter()
 
@@ -14,6 +16,7 @@ router = APIRouter()
 async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db)):
     user = await BasicAuthEngine(db).authenticate(data)
     if user is None:
+        logger.warning(f"Failed login attempt for username: {data.username}")
         raise exceptions.HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password.",
@@ -29,6 +32,6 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
         value=token,
         secure=True,
         httponly=True,
-        samesite="strict",
+        samesite="lax",
     )
-    return None
+    return {"message": "Login successful", "role": role}
