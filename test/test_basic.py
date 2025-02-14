@@ -66,7 +66,7 @@ def test_login_brute_force_protection(client, mock_user):
     assert response.status_code == 429
 
 
-async def test_login_xss_attack(client):
+def test_login_xss_attack(client):
     """Test XSS Attack attempt"""
     response = login(client, "<script>alert('XSS')</script>", "password123")
     assert response.status_code == 401
