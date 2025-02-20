@@ -1,12 +1,12 @@
 import pytest_asyncio, pytest
 
 from .mock import client, mock_db, TestClient
-from auth_service.core.controllers import UserController, schema
+from auth_service.core.controllers import UserController
 
 
 @pytest_asyncio.fixture()
 async def mock_user(mock_db):
-    data = schema.UserCreate(username="valid_user", password="hashed_password")
+    data = {"username":"valid_user", "password":"hashed_password"}
     user = await UserController(mock_db).create(data)
     return user
 
