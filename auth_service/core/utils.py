@@ -1,5 +1,6 @@
 import bcrypt
 import jwt
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from datetime import datetime, timedelta, timezone
 from .config_manager import conf
 
@@ -40,3 +41,36 @@ def create_access_token(
     }
 
     return jwt.encode(payload, conf.private_key, algorithm="RS256")
+
+
+def verify_access_token(token: str) -> dict:
+    """
+    Verify and decode a JWT access token.
+
+    Args:
+        token (str): The JWT token to verify.
+
+    Returns:
+        dict: Decoded token payload if valid.
+
+    Raises:
+        ExpiredSignatureError: If the token has expired.
+        InvalidTokenError: If the token is invalid or cannot be decoded.
+    """
+    try:
+        payload = jwt.decode(
+            token,
+            conf.public_key,
+            algorithms=["RS256"],
+            options={
+                "verify_exp": True,
+                "verify_iat": True,
+                "verify_nbf": True,
+            },
+        )
+        return payload
+    except ExpiredSignatureError:
+        raise ExpiredSignatureError("Token has expired")
+    except InvalidTokenError as e:
+        raise InvalidTokenError(f"Invalid token: {str(e)}")
+    
