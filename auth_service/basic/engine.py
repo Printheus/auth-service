@@ -1,7 +1,10 @@
+from logging import getLogger
 from fastapi import exceptions, status
 from bcrypt import checkpw
 from auth_service.core.engine import AbstractAuthEngine
 from auth_service.core.models import User
+
+logger = getLogger(__name__)
 
 
 class BasicAuthEngine(AbstractAuthEngine):
@@ -17,3 +20,8 @@ class BasicAuthEngine(AbstractAuthEngine):
                 status_code=status.HTTP_403_FORBIDDEN, detail="user is not active"
             )
         return user
+
+    async def sign_up(self, data: dict) -> User:
+        logger.info(f"\nProcessing sign_up request")
+        user = await self.user_controller.create(data)
+        return user.__dict__
