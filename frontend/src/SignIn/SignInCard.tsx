@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   FormControl,
-  FormLabel,
   Link,
   styled,
   TextField,
@@ -10,6 +9,7 @@ import {
 } from "@mui/material";
 import MuiCard from "@mui/material/Card";
 import { useForm } from "react-hook-form";
+import apiClient from "../service/api-client";
 
 interface BasicLoginForm {
   username: string;
@@ -36,6 +36,14 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 export default function SignInCard() {
   const { register, handleSubmit } = useForm<BasicLoginForm>();
+  const onSubmit = (data: BasicLoginForm) =>{
+    const request = apiClient.post("/login", data)
+    request.then((res)=>{
+      console.log(res)
+    })
+    .catch((err)=> {console.log(err)})
+    
+  }
   return (
     <Card>
       <Typography
@@ -47,7 +55,7 @@ export default function SignInCard() {
       </Typography>
       <Box
         component="form"
-        onSubmit={handleSubmit((data)=>{console.log(data)})}
+        onSubmit={handleSubmit(onSubmit)}
         sx={{ display: "flex", flexDirection: "column", width: "100%", gap: 2 }}
       >
         <FormControl>
