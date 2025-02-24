@@ -1,8 +1,10 @@
 import {
+  Alert,
   Box,
   Button,
   FormControl,
   Link,
+  Snackbar,
   styled,
   TextField,
   Typography,
@@ -10,6 +12,8 @@ import {
 import MuiCard from "@mui/material/Card";
 import { useForm } from "react-hook-form";
 import apiClient from "../service/api-client";
+import { useState } from "react";
+import axios from "axios";
 
 interface BasicLoginForm {
   username: string;
@@ -36,14 +40,30 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 export default function SignInCard() {
   const { register, handleSubmit } = useForm<BasicLoginForm>();
-  const onSubmit = (data: BasicLoginForm) =>{
-    const request = apiClient.post("/login", data)
-    request.then((res)=>{
-      console.log(res)
-    })
-    .catch((err)=> {console.log(err)})
-    
-  }
+  const [error, setError] = useState("");
+  const [open, setOpen] = useState(false);
+  const onSubmit = (data: BasicLoginForm) => {
+    const request = apiClient.post("/login", data);
+    request
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        if (axios.isAxiosError(err)) {
+          if (err.response) {
+            setError(err.response.data.detail);
+          } else if (err.request) {
+            setError("Network error. Please check your connection.");
+          } else {
+            setError("An unexpected error occurred.");
+          }
+        } else {
+          setError("An unexpected error occurred.");
+        }
+        setOpen(true);
+        console.log(err);
+      });
+  };
   return (
     <Card>
       <Typography
@@ -86,7 +106,7 @@ export default function SignInCard() {
           Don&apos;t have an account?{" "}
           <span>
             <Link
-              href="/material-ui/getting-started/templates/sign-in/"
+              href="/sign-up"
               variant="body2"
               sx={{ alignSelf: "center" }}
             >
@@ -95,6 +115,23 @@ export default function SignInCard() {
           </span>
         </Typography>
       </Box>
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={() => {
+          setOpen(false);
+        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+      >
+        <Alert
+          onClose={()=>{setOpen(false)}}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 }
