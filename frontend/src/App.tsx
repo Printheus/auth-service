@@ -15,8 +15,8 @@ const App: React.FC = () => {
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path='/' element={<SignInSide/>}/>
-          <Route path="/test" element={<SignIn/>} />
+          <Route path='/test' element={<SignInSide/>}/>
+          <Route path="/sign-in" element={<SignIn/>} />
         </Routes>
       </Router>
     </ThemeProvider>
