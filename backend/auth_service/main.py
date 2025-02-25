@@ -1,4 +1,5 @@
 from fastapi import Body, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 
 
@@ -18,6 +19,14 @@ async def create_all():
 
 app = FastAPI()
 app.add_event_handler("startup", create_all)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(basic_router)
 
