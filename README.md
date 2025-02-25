@@ -1,2 +1,2 @@
 # auth-service
-Authentication service
+Purly Indeppendent Authentication service
