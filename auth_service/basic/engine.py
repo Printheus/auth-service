@@ -24,4 +24,5 @@ class BasicAuthEngine(AbstractAuthEngine):
     async def sign_up(self, data: dict) -> User:
         logger.info(f"\nProcessing sign_up request")
         user = await self.user_controller.create(data)
+        logger.info(f"Signed up and a new user created")
         return user.__dict__
