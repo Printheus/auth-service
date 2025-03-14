@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SignInSide from './temp/SignInSide/SignInSide';
 import SignIn from './SignIn/SignIn';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
@@ -15,8 +14,7 @@ const App: React.FC = () => {
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path='/test' element={<SignInSide/>}/>
-          <Route path="/sign-in" element={<SignIn/>} />
+          <Route path="auth/" element={<SignIn/>} />
         </Routes>
       </Router>
     </ThemeProvider>
