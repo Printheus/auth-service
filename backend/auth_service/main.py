@@ -17,7 +17,9 @@ async def create_all():
         await con.run_sync(Base.metadata.create_all)
 
 
-app = FastAPI()
+app = FastAPI(
+    root_path="/api/auth"
+)
 app.add_event_handler("startup", create_all)
 
 app.add_middleware(

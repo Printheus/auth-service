@@ -7,6 +7,7 @@ import sqlalchemy as sa
 from .models import User, uuid
 from .utils import bcrypt_hasher
 
+from datetime import datetime, timezone
 
 class UserController:
     def __init__(self, db: AsyncSession):
@@ -19,7 +20,7 @@ class UserController:
 
     async def create(self, user: dict[str:str]) -> User:
         user["password"] = bcrypt_hasher(user["password"]).decode()
-        user = User(**user)
+        user = User(**user, date_joined=datetime.now(timezone.utc))
         self.db.add(user)
         try:
             await self.db.commit()

@@ -23,7 +23,7 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
             detail="Incorrect username or password.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    role = "admin" if user.is_admin else "base"
+    role = "admin" if user.is_superuser else "base"
     token = create_access_token(
         subject=str(user.user_id), username=user.username, user_role=role
     )
@@ -46,8 +46,7 @@ async def sign_up(
 ):
     try:
         user = await BasicAuthEngine(db).sign_up(data.model_dump())
-        
-        role = "admin" if user["is_admin"] else "base"
+        role = "admin" if user["is_superuser"] else "base"
         
         token = create_access_token(
             subject=str(user["user_id"]), 
