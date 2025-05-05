@@ -2,12 +2,12 @@ from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 
-from utils import (
+from app.utils import (
     verify_access_token, 
     ExpiredSignatureError, 
     InvalidTokenError,
 )
-from routers import auth
+from app.routers import auth
 
 app = FastAPI()
 app.include_router(auth.router)

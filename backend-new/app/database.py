@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass, sessionmaker
 import sqlalchemy as sa
-from settings import settings
+from .settings import settings
 
 
 engine = create_engine(
@@ -22,4 +22,4 @@ def get_db():
     try:
         yield session
     finally:
-        session.close()
+        session.close() 

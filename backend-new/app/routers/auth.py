@@ -2,13 +2,14 @@ from fastapi import Depends, Response, exceptions, status
 from fastapi.routing import APIRouter
 from logging import getLogger
 from bcrypt import checkpw
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
-from controllers import UserController
-from database import get_db
-from schemas import LoginRequestData
-from utils import create_token
-from settings import settings
+from app.controllers import UserController
+from app.database import get_db
+from app.models import User
+from app.schemas import LoginRequestData, UserCreate
+from app.utils import create_token, bcrypt_hasher
+from app.settings import settings
 
 router = APIRouter()
 logger = getLogger(__name__)
@@ -63,3 +64,52 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
     )
 
     return {"message": "Login successfully", "role": role, "Access_Token": access_token}
+
+
+@router.post("/sign_up")
+def signup(
+    data: UserCreate,
+    response: Response,
+    db= Depends(get_db),
+    ):
+    data.password = bcrypt_hasher(data.password)
+    user = User(**data.__dict__, date_joined=datetime.now(timezone.utc))
+    db.add(user)
+    try:
+        db.commit()
+        db.refresh(user)
+    except Exception as e:
+        raise Exception from e
+    
+    access_token = create_token(
+        payload={
+            "sub": "Access-Token",
+            "name": user.username,
+            "id": str(user.user_id),
+            "role": "base",
+        }
+    )
+
+    refresh_token = create_token(
+        payload={"sub": "Refresh-Token"},
+        expires_delta=timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE),
+    )
+
+    response.set_cookie(
+        key="Access-Token",
+        value=access_token,
+        secure=True,
+        httponly=True,
+        samesite="lax",
+    )
+
+    response.set_cookie(
+        key="Refresh-Token",
+        value=refresh_token,
+        secure=True,
+        httponly=True,
+        samesite="strict",
+    )
+
+    return {"message": "Login successfully", "role": "base", "Access_Token": access_token}
+

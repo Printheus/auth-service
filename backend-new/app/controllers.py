@@ -4,8 +4,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 import sqlalchemy as sa
 
-from models import User, uuid
-from utils import bcrypt_hasher
+from .models import User, uuid
+from .utils import bcrypt_hasher
 
 from datetime import datetime, timezone
 

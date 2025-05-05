@@ -3,7 +3,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from datetime import datetime, timedelta, timezone
 
-from settings import settings
+from .settings import settings
 
 
 def verify_access_token(token: str) -> dict:
