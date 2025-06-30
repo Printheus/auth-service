@@ -1,4 +1,4 @@
-from fastapi import Depends, Response, exceptions, status
+from fastapi import Body, Depends, Response, exceptions, status, HTTPException
 from fastapi.routing import APIRouter
 from logging import getLogger
 from bcrypt import checkpw
@@ -8,9 +8,14 @@ from app.controllers import UserController
 from app.database import get_db
 from app.models import User
 from app.schemas import LoginRequestData, UserCreate
-from app.utils import create_token, bcrypt_hasher
 from app.settings import settings
-
+from app.utils import (
+    verify_token, 
+    ExpiredSignatureError, 
+    InvalidTokenError,
+    create_token,
+    bcrypt_hasher
+)
 router = APIRouter()
 logger = getLogger(__name__)
 
@@ -43,7 +48,12 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
     )
 
     refresh_token = create_token(
-        payload={"sub": "Refresh-Token"},
+        payload={
+            "sub": "Refresh-Token",
+            "name": user.username,
+            "id": str(user.user_id),
+            "role": role,
+            },
         expires_delta=timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE),
     )
 
@@ -67,11 +77,11 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
 
 
 @router.post("/sign_up")
-def signup(
+async def signup(
     data: UserCreate,
-    response: Response,
     db= Depends(get_db),
     ):
+    
     data.password = bcrypt_hasher(data.password)
     user = User(**data.__dict__, date_joined=datetime.now(timezone.utc))
     db.add(user)
@@ -81,35 +91,23 @@ def signup(
     except Exception as e:
         raise Exception from e
     
-    access_token = create_token(
-        payload={
-            "sub": "Access-Token",
-            "name": user.username,
-            "id": str(user.user_id),
-            "role": "base",
-        }
-    )
 
-    refresh_token = create_token(
-        payload={"sub": "Refresh-Token"},
-        expires_delta=timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE),
-    )
+    return {"message": "Login successfully", "role": "base"}
 
-    response.set_cookie(
-        key="Access-Token",
-        value=access_token,
-        secure=True,
-        httponly=True,
-        samesite="lax",
-    )
 
-    response.set_cookie(
-        key="Refresh-Token",
-        value=refresh_token,
-        secure=True,
-        httponly=True,
-        samesite="strict",
-    )
+@router.post("/verify")
+async def token_verification(token: str = Body(embed=True)) -> dict:
+    try:
+        payload = verify_token(token)
 
-    return {"message": "Login successfully", "role": "base", "Access_Token": access_token}
+        if isinstance(payload, dict):
+            return {"access_token": token, "payload": payload}
+        else:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+    except ExpiredSignatureError as e:
+        raise HTTPException(status_code=401, detail="Token has expired") from e
+    except InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {e}") from e
+
 
