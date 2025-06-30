@@ -111,3 +111,26 @@ async def token_verification(token: str = Body(embed=True)) -> dict:
         raise HTTPException(status_code=401, detail=f"Invalid token: {e}") from e
 
 
+@router.post("/refresh")
+async def refresh_token(response: Response, token: str = Body(embed=True)) -> dict:
+    print("Helooo")
+    payload = verify_token(token)
+    if payload["sub"] != "Refresh-Token":
+        raise HTTPException(status_code=400, detail="Bad Token")
+
+    access_token = create_token(
+        payload={
+            "sub": "Access-Token",
+            "name": payload["name"],
+            "id": str(payload["id"]),
+            "role": payload["role"],
+        }
+    )
+    response.set_cookie(
+        key="Access-Token",
+        value=access_token,
+        secure=True,
+        httponly=True,
+        samesite="lax",
+    )
+    return {"Access-Token": access_token}
