@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from .settings import settings
 
 
-def verify_access_token(token: str) -> dict:
+def verify_token(token: str) -> dict:
     """
     Verify and decode a JWT access token.
 
