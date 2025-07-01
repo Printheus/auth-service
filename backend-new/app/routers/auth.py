@@ -62,7 +62,7 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
         value=access_token,
         secure=True,
         httponly=True,
-        samesite="lax",
+        samesite="None",
     )
 
     response.set_cookie(
@@ -70,7 +70,7 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
         value=refresh_token,
         secure=True,
         httponly=True,
-        samesite="strict",
+        samesite="None",
     )
 
     return {"message": "Login successfully", "role": role, "Access_Token": access_token}
