@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import apiClient from "../service/api-client";
 import { useState } from "react";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 
 interface BasicLoginForm {
   username: string;
@@ -39,27 +40,44 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 export default function SignInCard() {
+  const [searchParams] = useSearchParams();
   const { register, handleSubmit } = useForm<BasicLoginForm>();
-  const [error, setError] = useState("");
+  const [msg, setMsg] = useState("");
   const [open, setOpen] = useState(false);
+  const [isError, setIsError] = useState(true);
   const onSubmit = (data: BasicLoginForm) => {
-    const request = apiClient.post("/login", data);
+    const request = apiClient.post("/login", data, {  withCredentials: true});
     request
       .then((res) => {
         console.log(res);
+        setIsError(false)
+        setMsg("Signed in")
+        setOpen(true)
+        
+        const redirectUrl = searchParams.get('redirect');
+        setTimeout(() => {
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+          }
+          else{
+            window.location.href = import.meta.env.VITE_API_DASHBOARD_URL;
+          }
+        }, 2000); // 2 seconds
+      
       })
       .catch((err) => {
         if (axios.isAxiosError(err)) {
           if (err.response) {
-            setError(err.response.data.detail);
+            setMsg(err.response.data.detail);
           } else if (err.request) {
-            setError("Network error. Please check your connection.");
+            setMsg("Network error. Please check your connection.");
           } else {
-            setError("An unexpected error occurred.");
+            setMsg("An unexpected error occurred.");
           }
         } else {
-          setError("An unexpected error occurred.");
+          setMsg("An unexpected error occurred.");
         }
+        setIsError(true)
         setOpen(true);
         console.log(err);
       });
@@ -125,11 +143,11 @@ export default function SignInCard() {
       >
         <Alert
           onClose={()=>{setOpen(false)}}
-          severity="error"
+          severity={isError? "error": "success"}
           variant="filled"
           sx={{ width: "100%" }}
         >
-          {error}
+          {msg}
         </Alert>
       </Snackbar>
     </Card>
