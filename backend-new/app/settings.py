@@ -21,15 +21,11 @@ class Settings:
 
     @property
     def private_key(self):
-        with open(self.PRIVATE_KEY, "r") as pk_file:
-            pk = pk_file.read()
-        return pk
+        return self.PRIVATE_KEY
 
     @property
     def public_key(self):
-        with open(self.PUBLIC_KEY, "r") as pk_file:
-            pk = pk_file.read()
-        return pk
+        return self.PUBLIC_KEY
 
 
 settings = Settings()

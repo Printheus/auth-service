@@ -14,4 +14,4 @@ RUN export MYSQLCLIENT_CFLAGS=`pkg-config mysqlclient --cflags`
 
 RUN pip install -r req.pip
 COPY . .
-CMD [ "uvicorn", "main:app", "--host=0.0.0.0" ]
+CMD [ "python", "runner.py" ]
