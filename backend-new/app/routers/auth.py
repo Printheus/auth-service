@@ -1,4 +1,5 @@
-from fastapi import Body, Depends, Response, exceptions, status, HTTPException
+from typing import Optional
+from fastapi import Body, Depends, Response, exceptions, status, HTTPException, Cookie
 from fastapi.routing import APIRouter
 from logging import getLogger
 from bcrypt import checkpw
@@ -10,12 +11,13 @@ from app.models import User
 from app.schemas import LoginRequestData, UserCreate
 from app.settings import settings
 from app.utils import (
-    verify_token, 
-    ExpiredSignatureError, 
+    verify_token,
+    ExpiredSignatureError,
     InvalidTokenError,
     create_token,
-    bcrypt_hasher
+    bcrypt_hasher,
 )
+
 router = APIRouter()
 logger = getLogger(__name__)
 
@@ -53,7 +55,7 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
             "name": user.username,
             "id": str(user.user_id),
             "role": role,
-            },
+        },
         expires_delta=timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE),
     )
 
@@ -79,9 +81,9 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
 @router.post("/sign_up")
 async def signup(
     data: UserCreate,
-    db= Depends(get_db),
-    ):
-    
+    db=Depends(get_db),
+):
+
     data.password = bcrypt_hasher(data.password)
     user = User(**data.__dict__, date_joined=datetime.now(timezone.utc))
     db.add(user)
@@ -90,7 +92,6 @@ async def signup(
         db.refresh(user)
     except Exception as e:
         raise Exception from e
-    
 
     return {"message": "Login successfully", "role": "base"}
 
@@ -112,12 +113,28 @@ async def token_verification(token: str = Body(embed=True)) -> dict:
 
 
 @router.post("/refresh")
-async def refresh_token(response: Response, token: str = Body(embed=True)) -> dict:
-    print("Helooo")
-    payload = verify_token(token)
-    if payload["sub"] != "Refresh-Token":
-        raise HTTPException(status_code=400, detail="Bad Token")
+async def refresh_token(
+    response: Response,
+    refresh_token: Optional[str] = Cookie(
+        None,
+        alias="Refresh-Token",
+        description="HttpOnly cookie containing the refresh JWT",
+    ),
+) -> dict:
+    # 1) Ensure we actually got a cookie
+    if not refresh_token:
+        raise HTTPException(status_code=400, detail="Missing refresh token cookie")
 
+    # 2) Verify it and check its type
+    try:
+        payload = verify_token(refresh_token)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    if payload.get("sub") != "Refresh-Token":
+        raise HTTPException(status_code=400, detail="Bad token type")
+
+    # 3) Create a fresh Access-Token
     access_token = create_token(
         payload={
             "sub": "Access-Token",
@@ -126,11 +143,15 @@ async def refresh_token(response: Response, token: str = Body(embed=True)) -> di
             "role": payload["role"],
         }
     )
+
+    # 4) Send it back as a secure, HttpOnly cookie
     response.set_cookie(
         key="Access-Token",
         value=access_token,
         secure=True,
         httponly=True,
         samesite="lax",
+        path="/",
     )
-    return {"Access-Token": access_token}
+
+    return {"status": "ok"}
