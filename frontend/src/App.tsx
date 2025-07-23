@@ -1,12 +1,11 @@
+// App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SignIn from './SignIn/SignIn';
-import { CssBaseline } from '@mui/material';
-import { ThemeProvider } from '@emotion/react';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 import theme from './theme';
-// import SignInSide from './SignInSide';
 
-
+import SignIn from './SignIn/SignIn';
+import Home from './Home';
 
 const App: React.FC = () => {
   return (
@@ -14,7 +13,9 @@ const App: React.FC = () => {
       <CssBaseline />
       <Router>
         <Routes>
-          <Route path="auth/" element={<SignIn/>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<SignIn />} />
+          <Route path="*" element={<div>404 Route Not Found</div>} />
         </Routes>
       </Router>
     </ThemeProvider>
