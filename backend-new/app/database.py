@@ -11,7 +11,7 @@ engine = create_engine(
     pool_size=20,
     max_overflow=0
 )
-
+print(engine.url)
 
 class Base(DeclarativeBase, MappedAsDataclass): ...
 

@@ -9,6 +9,7 @@ class Settings:
     PUBLIC_KEY = os.environ.get("PUBLIC_KEY", "./public_key.pem")
     ACCESS_TOKEN_EXPIRE = 15
     REFRESH_TOKEN_EXPIRE = 24 * 60
+    ROOT_PATH = os.environ.get("ROOT_PATH", "/")
     DATABASE = {
         "drivername": "mysql+mysqldb",
         "database": os.environ.get("DATABASE_NAME", "mydb"),
@@ -17,7 +18,7 @@ class Settings:
         "host": os.environ.get("DATABASE_HOST", "127.0.0.1"),
         "port": 3306
     }
-    PORT = int(os.environ.get("PORT"))
+    PORT = int(os.environ.get("PORT", "8000"))
 
     @property
     def private_key(self):

@@ -21,7 +21,7 @@ logger = getLogger(__name__)
 
 
 @router.post("/login", name="basic_login")
-async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db)):
+def log_in(data: LoginRequestData, response: Response, db=Depends(get_db)):
     user = UserController(db).retrieve_by_username(data.username)
     if (user is None) or (not checkpw(data.password.encode(), user.password.encode())):
         logger.warning(f"Failed login attempt for username: {data.username}")
@@ -60,9 +60,9 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
     response.set_cookie(
         key="Access-Token",
         value=access_token,
-        secure=True,
+        secure=False,
         httponly=True,
-        samesite="None",
+        samesite="Lax",
     )
 
     response.set_cookie(
@@ -70,16 +70,16 @@ async def log_in(data: LoginRequestData, response: Response, db=Depends(get_db))
         value=refresh_token,
         secure=True,
         httponly=True,
-        samesite="None",
+        samesite="lax",
     )
 
     return {"message": "Login successfully", "role": role, "Access_Token": access_token}
 
 
 @router.post("/sign_up")
-async def signup(
+def signup(
     data: UserCreate,
-    db= Depends(get_db),
+    db = Depends(get_db),
     ):
     
     data.password = bcrypt_hasher(data.password)
@@ -96,7 +96,7 @@ async def signup(
 
 
 @router.post("/verify")
-async def token_verification(token: str = Body(embed=True)) -> dict:
+def token_verification(token: str = Body(embed=True)) -> dict:
     try:
         payload = verify_token(token)
 
@@ -112,7 +112,7 @@ async def token_verification(token: str = Body(embed=True)) -> dict:
 
 
 @router.post("/refresh")
-async def refresh_token(response: Response, token: str = Body(embed=True)) -> dict:
+def refresh_token(response: Response, token: str = Body(embed=True)) -> dict:
     print("Helooo")
     payload = verify_token(token)
     if payload["sub"] != "Refresh-Token":
